@@ -2,7 +2,6 @@
 ### Thiết kế Giao thức Tầng Ứng dụng & Tối ưu hóa Đồng bộ Trạng thái Game Nhiều người chơi
 
 > 📄 **Đề bài chi tiết:** Xem file đính kèm [Assignment_1_v1.2.pdf](./Assignment_1_v1.2.pdf)  
-> 🎓 **Môn học:** Mạng máy tính (Computer Networks - CO3093) — HK261  
 > 🏷️ **Trạng thái kiểm thử:** **32/32 tests PASS (100%)** ✅  
 > 🚀 **Hiệu quả tối ưu:** **Tiết kiệm 87.95% băng thông** so với Baseline  
 
