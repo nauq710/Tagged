@@ -1,5 +1,4 @@
-# BÁO CÁO BÀI TẬP LỚN MÔN MẠNG MÁY TÍNH (CO3093)
-## Assignment 1: Tag, You're Lagged!
+## Tag, You're Lagged!
 ### Thiết kế Giao thức Tầng Ứng dụng & Tối ưu hóa Đồng bộ Trạng thái Game Nhiều người chơi
 
 > 📄 **Đề bài chi tiết:** Xem file đính kèm [Assignment_1_v1.2.pdf](./Assignment_1_v1.2.pdf)  
