@@ -1,0 +1,7 @@
+services:
+  - type: web
+    name: tag-youre-lagged
+    runtime: docker
+    plan: free
+    healthCheckPath: /health
+    autoDeployTrigger: off
