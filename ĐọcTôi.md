@@ -1,15 +1,3 @@
-# BÁO CÁO KỸ THUẬT VÀ TÀI LIỆU HỆ THỐNG: "TAG, YOU'RE LAGGED!"
-## Thiết kế Giao thức Tầng Ứng dụng, Đồng bộ Trạng thái & Tối ưu hóa Mạng
-### Môn học: Mạng máy tính (CO3093) — HCMUT — Học kỳ HK261
-
-> 👥 **Nhóm thực hiện:** GroupOfNeo  
-> 🏷️ **Trạng thái kiểm thử:** **32/32 Tests chính thức PASS (100%)** ✅ | **2/2 Team Edge-Case Tests PASS** ✅  
-> 🚀 **Hiệu quả giảm băng thông đo được:** **88.26%** (từ 2,056,266 Bytes giảm còn 241,459 Bytes)  
-> 📦 **Tài liệu nộp bài:** `README.md` (Bản tiếng Anh chuẩn), `BAO_CAO_TIENG_VIET.md` (Bản tiếng Việt chi tiết), `GroupOfNeo.zip` (Gói mã nguồn nộp BKLMS)  
-> 🐳 **Hạ tầng triển khai:** Đã container hóa bằng `Dockerfile` và cấu hình tự động qua `render.yaml`
-
----
-
 ## MỤC LỤC CHI TIẾT
 1. [Tóm tắt Dự án & Hướng dẫn Chạy Nhanh (Quick Start)](#1-tóm-tắt-dự-án--hướng-dẫn-chạy-nhanh-quick-start)
 2. [Đặc tả Bài toán & Ràng buộc Luật chơi (Mechanics Constraints)](#2-đặc-tả-bài-toán--ràng-buộc-luật-chơi-mechanics-constraints)
