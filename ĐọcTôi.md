@@ -631,7 +631,7 @@ $$\text{Bảo toàn Danh tính} = \mathbf{True} \quad (\text{ID ban đầu: } \t
 
 ---
 
-## 6. Bảng Đối soát Rubric Đánh giá Môn học (Đạt điểm tối đa)
+## 6. Bảng Đối soát Rubric
 
 | Trọng số | Tiêu chí Đánh giá | Yêu cầu Chi tiết trong Đề bài | Minh chứng Hiện thực trong Bài nộp |
 |:---:|:---|:---|:---|
