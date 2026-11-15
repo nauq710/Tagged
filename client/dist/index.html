@@ -80,13 +80,21 @@ class ClientTransport {
   }
   connect({ name, room }) {
     this.disconnect();
+    let sessionToken = '';
+    try {
+      sessionToken = localStorage.getItem('tag_session_token') || '';
+      if (!sessionToken) {
+        sessionToken = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'sess_' + Math.random().toString(36).substring(2, 12);
+        localStorage.setItem('tag_session_token', sessionToken);
+      }
+    } catch {}
     const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const url = `${scheme}//${location.host}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
     this.hooks.onStatus('Connecting...');
     socket.onopen = () => {
-      socket.send(JSON.stringify({ type: 'join', name, room, delta: true }));
+      socket.send(JSON.stringify({ type: 'join', name, room, delta: true, token: sessionToken }));
       this.hooks.onStatus('Connected');
       this.probe = window.setInterval(() => {
         if (socket.readyState === WebSocket.OPEN) {
@@ -102,6 +110,8 @@ class ClientTransport {
           const updated = applyDelta(this.lastSnapshot, raw);
           this.lastSnapshot = updated;
           this.hooks.onSnapshot(updated);
+        } else if (socket.readyState === WebSocket.OPEN) {
+          socket.send(JSON.stringify({ type: 'resync' }));
         }
         return;
       }
@@ -124,6 +134,11 @@ class ClientTransport {
   }
   rejoin() {
     if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify({ type: 'rejoin' }));
+  }
+  leave() {
+    if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify({ type: 'leave' }));
+    try { localStorage.removeItem('tag_session_token'); } catch {}
+    this.disconnect();
   }
   disconnect() {
     this.clearProbe();
@@ -548,7 +563,7 @@ window.addEventListener('DOMContentLoaded', () => {
   });
 
   ui.onJoin((name, room) => { connected = false; network.connect({ name, room }); });
-  ui.onLeave(() => { network.disconnect(); connected = false; ui.setStatus('Left game'); });
+  ui.onLeave(() => { network.leave(); connected = false; ui.setStatus('Left game'); });
   ui.onRejoin(() => network.rejoin());
 
   window.setInterval(() => {

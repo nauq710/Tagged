@@ -38,7 +38,7 @@ const network = new ClientTransport({
 });
 
 ui.onJoin((name, room) => { connected = false; network.connect({ name, room }); });
-ui.onLeave(() => { network.disconnect(); connected = false; ui.setStatus('Left game'); });
+ui.onLeave(() => { network.leave(); connected = false; ui.setStatus('Left game'); });
 ui.onRejoin(() => network.rejoin());
 
 // Application generates player intent at a fixed rate; transport may decide

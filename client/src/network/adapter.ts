@@ -15,13 +15,21 @@ export class ClientTransport {
 
   connect({ name, room }: ConnectionOptions): void {
     this.disconnect();
+    let sessionToken = '';
+    try {
+      sessionToken = localStorage.getItem('tag_session_token') || '';
+      if (!sessionToken) {
+        sessionToken = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : 'sess_' + Math.random().toString(36).substring(2, 12);
+        localStorage.setItem('tag_session_token', sessionToken);
+      }
+    } catch {}
     const scheme = location.protocol === 'https:' ? 'wss:' : 'ws:';
     const url = `${scheme}//${location.host}/ws`;
     const socket = new WebSocket(url);
     this.socket = socket;
     this.hooks.onStatus('Connecting...');
     socket.onopen = () => {
-      socket.send(JSON.stringify({ type: 'join', name, room, delta: true }));
+      socket.send(JSON.stringify({ type: 'join', name, room, delta: true, token: sessionToken }));
       this.hooks.onStatus('Connected');
       this.probe = window.setInterval(() => {
         if (socket.readyState === WebSocket.OPEN) {
@@ -38,6 +46,9 @@ export class ClientTransport {
           const updated = applyDelta(this.lastSnapshot, record);
           this.lastSnapshot = updated;
           this.hooks.onSnapshot(updated);
+        } else if (socket.readyState === WebSocket.OPEN) {
+          // Desynchronization detected: request immediate full snapshot from server
+          socket.send(JSON.stringify({ type: 'resync' }));
         }
         return;
       }
@@ -62,6 +73,11 @@ export class ClientTransport {
 
   rejoin(): void {
     if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify({ type: 'rejoin' }));
+  }
+  leave(): void {
+    if (this.socket?.readyState === WebSocket.OPEN) this.socket.send(JSON.stringify({ type: 'leave' }));
+    try { localStorage.removeItem('tag_session_token'); } catch {}
+    this.disconnect();
   }
   disconnect(): void {
     this.clearProbe();
@@ -120,6 +136,8 @@ export class ScenarioDataTransport {
             const updated = applyDelta(this.lastSnapshot, message);
             this.lastSnapshot = updated;
             this.hooks.onSnapshot(updated);
+          } else if (this.socket?.readyState === WebSocket.OPEN) {
+            this.socket.send(JSON.stringify({ type: 'resync' }));
           }
         } else if (message.type === 'sim_game_ack') {
           const key = String(message.tick) + ':' + String(message.index);
@@ -156,6 +174,8 @@ export class ScenarioDataTransport {
       if (action.op === 'join') {
         payload.name = action.name ?? actor;
         payload.room = room;
+        payload.delta = true;
+        payload.token = 'sim_' + actor + '_' + runId;
       } else if (action.op === 'input') {
         payload.seq = action.seq; payload.dx = action.dx; payload.dy = action.dy;
         payload.cloak = action.cloak ?? false;
