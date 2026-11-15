@@ -1,4 +1,4 @@
-# BÁO CÁO KỸ THUẬT VÀ TÀI LIỆU HỆ THỐNG: "TAG, YOU'RE LAGGED!"
+# BÁO CÁO KỸ THUẬT VÀ TÀI LIỆU HỆ THỐNG: "TAG, YOU'RE LAGGED! (AI dịch)"
 ## Thiết kế Giao thức Tầng Ứng dụng, Đồng bộ Trạng thái & Tối ưu hóa Mạng
 ### Môn học: Mạng máy tính (CO3093) — HCMUT — Học kỳ HK261
 
