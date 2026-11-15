@@ -1,23 +1,62 @@
 {
-  "baseline": {
-    "clients_succeeded": 8,
-    "total_bytes": 2063143,
-    "total_snapshots": 648,
-    "total_deltas": 0,
-    "avg_msg_size_bytes": 2223.2,
-    "p50_msg_size_bytes": 2947.0,
-    "rtt_p50_ms": 0.6,
-    "rtt_p95_ms": 1.31
+  "comparison": {
+    "baseline": {
+      "clients_succeeded": 8,
+      "total_bytes": 2056266,
+      "total_snapshots": 648,
+      "total_deltas": 0,
+      "avg_msg_size_bytes": 2215.8,
+      "p50_msg_size_bytes": 2947.0,
+      "rtt_p50_ms": 0.84,
+      "rtt_p95_ms": 1.97
+    },
+    "optimized": {
+      "clients_succeeded": 8,
+      "total_bytes": 241459,
+      "total_snapshots": 16,
+      "total_deltas": 632,
+      "avg_msg_size_bytes": 260.2,
+      "p50_msg_size_bytes": 157.0,
+      "rtt_p50_ms": 0.98,
+      "rtt_p95_ms": 1.78
+    },
+    "bandwidth_reduction_percent": 88.26
   },
-  "optimized": {
-    "clients_succeeded": 8,
-    "total_bytes": 243751,
-    "total_snapshots": 16,
-    "total_deltas": 632,
-    "avg_msg_size_bytes": 262.7,
-    "p50_msg_size_bytes": 158.0,
-    "rtt_p50_ms": 0.64,
-    "rtt_p95_ms": 1.33
+  "scaling_load_test": {
+    "10_bots": {
+      "active_bots": 10,
+      "throughput_kbps": 447.24,
+      "rtt_p50_ms": 0.97,
+      "rtt_p95_ms": 2.33,
+      "avg_msg_size_bytes": 398.7
+    },
+    "25_bots": {
+      "active_bots": 25,
+      "throughput_kbps": 975.87,
+      "rtt_p50_ms": 1.77,
+      "rtt_p95_ms": 6.37,
+      "avg_msg_size_bytes": 343.9
+    },
+    "50_bots": {
+      "active_bots": 50,
+      "throughput_kbps": 2015.94,
+      "rtt_p50_ms": 6.93,
+      "rtt_p95_ms": 14.25,
+      "avg_msg_size_bytes": 347.2
+    },
+    "100_bots": {
+      "active_bots": 100,
+      "throughput_kbps": 4026.43,
+      "rtt_p50_ms": 6.66,
+      "rtt_p95_ms": 23.35,
+      "avg_msg_size_bytes": 349.4
+    }
   },
-  "savings_percent": 88.19
+  "state_recovery_benchmark": {
+    "reconnect_recovery_latency_ms": 1.73,
+    "identity_preserved": true,
+    "initial_player_id": "cce91f9a4aa0",
+    "reconnected_player_id": "cce91f9a4aa0",
+    "state_received_type": "snapshot"
+  }
 }
