@@ -1,0 +1,72 @@
+{
+  "version": 1,
+  "name": "late-join-finish",
+  "room": "sim-late-join",
+  "ticks": 86,
+  "events": [
+    {
+      "tick": 0,
+      "op": "join",
+      "player": "alice",
+      "name": "Alice"
+    },
+    {
+      "tick": 0,
+      "op": "join",
+      "player": "bob",
+      "name": "Bob"
+    },
+    {
+      "tick": 10,
+      "op": "input",
+      "player": "alice",
+      "seq": 1,
+      "dx": 1,
+      "dy": 0,
+      "cloak": false
+    },
+    {
+      "tick": 15,
+      "op": "input",
+      "player": "bob",
+      "seq": 1,
+      "dx": -1,
+      "dy": 0,
+      "cloak": false
+    },
+    {
+      "tick": 20,
+      "op": "join",
+      "player": "charlie",
+      "name": "Charlie"
+    },
+    {
+      "tick": 30,
+      "op": "input",
+      "player": "alice",
+      "seq": 2,
+      "dx": 0,
+      "dy": 0,
+      "cloak": false
+    },
+    {
+      "tick": 34,
+      "op": "input",
+      "player": "charlie",
+      "seq": 1,
+      "dx": 0,
+      "dy": 1,
+      "cloak": true
+    },
+    {
+      "tick": 48,
+      "op": "leave",
+      "player": "charlie"
+    },
+    {
+      "tick": 64,
+      "op": "leave",
+      "player": "bob"
+    }
+  ]
+}

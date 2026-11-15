@@ -1,0 +1,16 @@
+{
+  "format": "tag-lagged-expected-v1",
+  "scenario": "two-player-finish",
+  "scenario_sha256": "a60395a78cec23aa51b866609848e085b08b7aba86ffcf3cb116b375efc11dee",
+  "expected": {
+    "phase": "finished",
+    "round": 1,
+    "winner": "alice",
+    "players": {
+      "alice": {
+        "alive": true,
+        "credits": 0
+      }
+    }
+  }
+}
