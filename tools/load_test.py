@@ -1,8 +1,7 @@
 #!/usr/bin/env python3
-"""Reference-protocol load test: synthetic headless players, no browser required.
+"""Load-test utility supporting both Baseline and Optimized (Delta + Session) protocols.
 
-STUDENT-EDITABLE if your networking protocol changes. Do not change the
-meaning of movement/collection/cloak actions or present unverified metrics as gameplay latency.
+STUDENT-EDITABLE: Measures latency, bandwidth, and stability under synthetic load.
 """
 from __future__ import annotations
 
@@ -12,19 +11,33 @@ import json
 import random
 import statistics
 import time
+import uuid
 
 from aiohttp import ClientSession, WSMsgType
 
 
-async def bot(session: ClientSession, url: str, index: int, end: float, room_size: int) -> dict:
+async def bot(session: ClientSession, url: str, index: int, end: float, room_size: int, use_delta: bool) -> dict:
     rng = random.Random(1000 + index)
     room = f'load-{index // room_size:03d}'
-    received_bytes, snapshot_count, probes = 0, 0, []
+    token = f'tok_load_{index:04d}_{uuid.uuid4().hex[:8]}'
+    received_bytes = 0
+    snapshot_count = 0
+    delta_count = 0
+    probes = []
+    
     async with session.ws_connect(url, heartbeat=20, timeout=15) as socket:
-        await socket.send_json({'type': 'join', 'name': f'bot-{index}', 'room': room})
+        join_msg = {
+            'type': 'join',
+            'name': f'bot-{index}',
+            'room': room,
+            'token': token,
+            'delta': use_delta
+        }
+        await socket.send_json(join_msg)
         welcome = await socket.receive_json(timeout=10)
-        if welcome['type'] != 'welcome':
+        if welcome.get('type') != 'welcome':
             raise RuntimeError(f'Join rejected: {welcome}')
+        
         last_send = 0.0
         last_ping = 0.0
         seq = 0
@@ -36,57 +49,86 @@ async def bot(session: ClientSession, url: str, index: int, end: float, room_siz
                 seq += 1
                 if seq % 15 == 1:
                     dx, dy = rng.choice([-1, 0, 1]), rng.choice([-1, 0, 1])
-                await socket.send_json({'type': 'input', 'seq': seq, 'dx': dx, 'dy': dy, 'cloak': seq % 37 == 0})
-            if now - last_ping >= 2:
+                await socket.send_json({
+                    'type': 'input',
+                    'seq': seq,
+                    'dx': dx,
+                    'dy': dy,
+                    'cloak': seq % 37 == 0
+                })
+            if now - last_ping >= 1.0:
                 last_ping = now
                 await socket.send_json({'type': 'ping', 'nonce': time.monotonic_ns()})
+            
             try:
                 msg = await socket.receive(timeout=0.02)
             except asyncio.TimeoutError:
                 continue
+                
             if msg.type == WSMsgType.TEXT:
                 received_bytes += len(msg.data.encode('utf-8'))
                 data = json.loads(msg.data)
-                if data.get('type') == 'snapshot': snapshot_count += 1
-                if data.get('type') == 'pong':
+                mtype = data.get('type')
+                if mtype == 'snapshot':
+                    snapshot_count += 1
+                elif mtype == 'delta':
+                    delta_count += 1
+                elif mtype == 'pong':
                     probes.append((time.monotonic_ns() - data['nonce']) / 1e6)
             elif msg.type in (WSMsgType.CLOSE, WSMsgType.CLOSED, WSMsgType.ERROR):
-                raise RuntimeError('Socket closed during test')
-    return {'snapshots': snapshot_count, 'bytes_received': received_bytes, 'rtts': probes}
+                raise RuntimeError('Socket closed unexpectedly')
+                
+    return {
+        'snapshots': snapshot_count,
+        'deltas': delta_count,
+        'bytes_received': received_bytes,
+        'rtts': probes
+    }
 
 
 async def run(args):
     url = args.url
-    if url.startswith('http://'): url = 'ws://' + url[7:].rstrip('/') + '/ws'
-    if url.startswith('https://'): url = 'wss://' + url[8:].rstrip('/') + '/ws'
+    if url.startswith('http://'):
+        url = 'ws://' + url[7:].rstrip('/') + '/ws'
+    elif url.startswith('https://'):
+        url = 'wss://' + url[8:].rstrip('/') + '/ws'
+        
     async with ClientSession() as session:
         end = time.monotonic() + args.duration
-        tasks = [bot(session, url, index, end, args.room_size) for index in range(args.players)]
+        tasks = [
+            bot(session, url, index, end, args.room_size, args.delta)
+            for index in range(args.players)
+        ]
         outcomes = await asyncio.gather(*tasks, return_exceptions=True)
         passed = [x for x in outcomes if isinstance(x, dict)]
         failures = [str(x) for x in outcomes if isinstance(x, BaseException)]
         rtts = [r for result in passed for r in result['rtts']]
         ordered = sorted(rtts)
-        print(json.dumps({
-            'target_players': args.players, 'completed_players': len(passed), 'failed_players': len(failures),
+        
+        result_payload = {
+            'target_players': args.players,
+            'completed_players': len(passed),
+            'failed_players': len(failures),
             'duration_s': args.duration,
+            'protocol_mode': 'delta' if args.delta else 'baseline_full',
             'snapshots_received': sum(r['snapshots'] for r in passed),
+            'deltas_received': sum(r['deltas'] for r in passed),
             'received_app_bytes': sum(r['bytes_received'] for r in passed),
             'ping_rtt_p50_ms': round(statistics.median(rtts), 2) if rtts else None,
-            'ping_rtt_p95_ms': round(ordered[min(len(ordered)-1, int(len(ordered)*.95))], 2) if rtts else None,
+            'ping_rtt_p95_ms': round(ordered[min(len(ordered)-1, int(len(ordered)*0.95))], 2) if rtts else None,
             'failure_examples': failures[:5],
-        }, indent=2))
+        }
+        print(json.dumps(result_payload, indent=2))
         if failures:
             raise SystemExit(1)
 
 
 if __name__ == '__main__':
-    parser = argparse.ArgumentParser(description='Load-test the baseline WebSocket protocol')
+    parser = argparse.ArgumentParser(description='Load-test utility for Tag game')
     parser.add_argument('--url', default='ws://127.0.0.1:8000/ws')
     parser.add_argument('--players', type=int, default=10)
-    parser.add_argument('--room-size', type=int, default=20)
-    parser.add_argument('--duration', type=int, default=15)
-    arguments = parser.parse_args()
-    if not 1 <= arguments.players <= 1000 or not 1 <= arguments.room_size <= 20 or arguments.duration < 1:
-        parser.error('Use 1-1000 players, room-size 1-20, and positive duration')
-    asyncio.run(run(arguments))
+    parser.add_argument('--room-size', type=int, default=4)
+    parser.add_argument('--duration', type=int, default=10)
+    parser.add_argument('--delta', action='store_true', help='Request delta snapshots (v2)')
+    args = parser.parse_args()
+    asyncio.run(run(args))

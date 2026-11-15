@@ -99,9 +99,15 @@ class GameTransport:
                                 actor, ctx.scenario['room'], token, event['name'])
                             sim_run, sim_actor = token, actor
                         else:
+                            stoken = data.get('token')
+                            if isinstance(stoken, str) and stoken:
+                                existing_pid = self.service.session_players.get(stoken)
+                                if existing_pid and existing_pid in self.sockets and not self.sockets[existing_pid].closed:
+                                    raise ValueError('Duplicate tab: player session already active in another tab.')
                             welcome = self.service.join(
                                 str(data.get('name', ''))[:18],
-                                str(data.get('room', 'main')))
+                                str(data.get('room', 'main')),
+                                session_token=stoken if isinstance(stoken, str) else None)
                             player_id = welcome['id']
                         self.sockets[player_id] = ws
                         self.client_supports_delta[player_id] = wants_delta
@@ -117,8 +123,13 @@ class GameTransport:
                     elif kind == 'rejoin' and player_id is not None:
                         if not self.service.rejoin(player_id):
                             raise ValueError('Rejoin unavailable')
-                    elif kind == 'leave' and player_id is not None and ctx:
-                        self.service.leave(player_id)
+                    elif kind == 'leave' and player_id is not None:
+                        self.service.leave(player_id, clear_session=True)
+                    elif kind == 'resync' and player_id is not None:
+                        snapshot = self.service.snapshot_for(player_id)
+                        if snapshot is not None:
+                            self.last_snapshots.pop(player_id, None)
+                            await ws.send_json(snapshot)
                     elif kind == 'ping':
                         nonce = data.get('nonce')
                         if isinstance(nonce, (float, int)) and not isinstance(nonce, bool):
@@ -139,7 +150,16 @@ class GameTransport:
                 self.sockets.pop(player_id, None)
                 self.last_snapshots.pop(player_id, None)
                 self.client_supports_delta.pop(player_id, None)
-                self.service.leave(player_id)
+                has_token = player_id in self.service.player_sessions
+                if not has_token:
+                    self.service.leave(player_id)
+                else:
+                    # Session survives reload with a grace period of 15 seconds
+                    async def delayed_leave(pid: str):
+                        await asyncio.sleep(15.0)
+                        if pid not in self.sockets and pid in self.service.player_sessions:
+                            self.service.leave(pid)
+                    asyncio.create_task(delayed_leave(player_id))
         return ws
 
     async def publish(self, snapshots: dict[str, dict]) -> None:
