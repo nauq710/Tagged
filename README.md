@@ -5,7 +5,7 @@
 > 👥 **Authors / Team:** GroupOfNeo  
 > 🏷️ **Test Suite Status:** **32/32 Official Tests Passed (100%)** ✅ | **2/2 Team Edge-Case Tests Passed** ✅  
 > 🚀 **Measured Bandwidth Reduction:** **88.26%** (from 2,056,266 B down to 241,459 B)  
-> 📦 **Artifacts Produced:** `README.md` (English Master Report), `BAO_CAO_TIENG_VIET.md` (Vietnamese Master Report), `GroupOfNeo.zip` (Submission Package)  
+> 📦 **Artifacts Produced:** `README.md` , `ĐọcTôi.md`, `GroupOfNeo.zip` (Submission Package)  
 > 🐳 **Deployment Ready:** Containerized via `Dockerfile` and automated via `render.yaml`
 
 ---
