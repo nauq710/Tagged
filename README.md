@@ -1,4 +1,4 @@
-# Technical Report & System Documentation: "Tag, You're Lagged!"
+# Technical Report & System Documentation: "Tag, You're Lagged! (Cần update Resume welcome_player"
 ## Application-Layer Protocol Design, State Synchronization & Network Optimization
 ### Course: Computer Networks (CO3093) — HCMUT — Semester HK261
 
