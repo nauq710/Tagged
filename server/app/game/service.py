@@ -28,13 +28,21 @@ class GameService:
 
         world = self.rooms[room]
         player_id = None
+        resumed = False
         # Persistent identity: if session_token provided and player already in room, reconnect!
         if session_token and session_token in self.session_players:
             existing_pid = self.session_players[session_token]
             if existing_pid in world.players:
                 player_id = existing_pid
-                world.players[player_id].name = name
+                p = world.players[player_id]
+                p.name = name
+                p.seq = -1
+                p.dx = 0
+                p.dy = 0
                 self.player_rooms[player_id] = room
+                resumed = True
+                if world.phase == 'waiting' and len(world.players) >= 2:
+                    world._start_round()
 
         if player_id is None:
             player_id = uuid.uuid4().hex[:12]
@@ -44,9 +52,12 @@ class GameService:
                 self.session_players[session_token] = player_id
                 self.player_sessions[player_id] = session_token
 
-        return {'type': 'welcome', 'id': player_id, 'room': room, 'width': WIDTH,
-                'height': HEIGHT, 'tick_rate': TICK_RATE, 'snapshot_rate': SNAPSHOT_RATE,
-                'room_capacity': ROOM_CAPACITY}
+        welcome = {'type': 'welcome', 'id': player_id, 'room': room, 'width': WIDTH,
+                   'height': HEIGHT, 'tick_rate': TICK_RATE, 'snapshot_rate': SNAPSHOT_RATE,
+                   'room_capacity': ROOM_CAPACITY}
+        if resumed:
+            welcome['resumed'] = True
+        return welcome
 
     def start_sim_room(self, room: str) -> None:
         if room in self.rooms:
