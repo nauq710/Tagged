@@ -675,12 +675,4 @@ $$\text{Identity Preserved} = \mathbf{True} \quad (\text{Initial ID: } \texttt{c
 
 ---
 
-## 7. Team Workload Distribution
 
-| Member | Primary Ownership | Core Deliverables |
-|:---|:---|:---|
-| **Member 1 (Lead)** | Protocol Specification & Codec | `server/app/network/protocol.py`, `docs/PROTOCOL.md`, `Dockerfile`, `render.yaml` |
-| **Member 2** | Game Engine & Determinism | `server/app/game/engine.py`, `tests_team/test_session_grace.py`, Oracle compatibility |
-| **Member 3** | Transport & Session Management | `server/app/network/transport.py`, `server/app/game/service.py`, Duplicate tab policy |
-| **Member 4** | Web Client & Delta Merging | `client/src/network/adapter.ts`, `protocol.ts`, `localStorage` persistence |
-| **Member 5** | Benchmarking & Performance Analysis | `tools/benchmark_comparison.py`, `load_test.py`, `docs/EXPERIMENTS.md` |
