@@ -22,6 +22,9 @@ const network = new ClientTransport({
     ui.setWorldSize(message.width, message.height);
     ui.setPlayerId(playerId);
     ui.setRoom(message.room);
+    if (message.resumed) {
+      ui.setStatus('Resumed existing session');
+    }
   },
   onSnapshot(snapshot: Snapshot) {
     if (snapshot.tick < mostRecentTick) return;

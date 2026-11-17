@@ -549,6 +549,9 @@ window.addEventListener('DOMContentLoaded', () => {
       ui.setWorldSize(message.width, message.height);
       ui.setPlayerId(playerId);
       ui.setRoom(message.room);
+      if (message.resumed) {
+        ui.setStatus('Resumed existing session');
+      }
     },
     onSnapshot(snapshot) {
       if (snapshot.tick < mostRecentTick) return;

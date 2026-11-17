@@ -114,6 +114,7 @@ class GameTransport:
                         await ws.send_json(welcome)
                         snapshot = self.service.snapshot_for(player_id)
                         if snapshot is not None:
+                            self.last_snapshots[player_id] = snapshot
                             await ws.send_json(snapshot)
                     elif kind == 'input' and player_id is not None:
                         action = parse_input(data)
